@@ -7,7 +7,7 @@ NATS.io is a simple, secure and high performance open source messaging system fo
 
 ### **nats server and nats-streaming-server**
 
-NATS is available in two interoperable modules, the core NATS platform -the NATS server (executable name is gnatsd) referred to simply as NATS and NATS Streaming (executable name is nats-streaming-server)
+NATS is available in two interoperable modules, the core NATS platform - the NATS server (executable name is gnatsd) referred to simply as NATS and NATS Streaming (executable name is nats-streaming-server)
 
 - Basic NATS Server is designed for high performance and simplicity.
 - NATS Server doesn’t provide a persistent store for the messages that you publish over the NATS.
@@ -43,7 +43,6 @@ https://github.com/nats-io/nats-streaming-operator
 
 Here are the steps we have performed to set up a nats cluster with nats-streaming-operator backed by a SQL store. We are setting up this cluster in EKS and using RDS as Postgres Backend.
 
-[1. Setup database and confirm connectivity from K8S/EKS](https://github.com/dijeesh/setup/01_setup_database_backend_and_confirm_connectivity)
 
 ### **1. Setup database and confirm connectivity from K8S/EKS**
 
@@ -113,4 +112,19 @@ kubectl create ns nats-io
 
 ### **3. Create secrets** 
 
+
+### **4. Generate SSL Certificates**
+
+We will be using cfssl to generate SSL Certificates. Run following commands to install cfssl.
+
+```
+sudo curl https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -o /usr/local/bin/cfssljson
+sudo curl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -o /usr/local/bin/cfssl
+sudo chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson
+```
 1. 
+
+
+
+
+Ref: https://gist.github.com/wallyqs/696b81427df7c239fb34946eb1ae9f92
