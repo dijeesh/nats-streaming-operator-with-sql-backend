@@ -46,7 +46,7 @@ Here are the steps we have performed to set up a nats cluster with nats-streamin
 ### **1. Clone Repository**
 
 ```
-git clone https://github.com/dijeesh/nats-streaming-operator-with-db-backend.git
+git clone https://github.com/dijeesh/nats-streaming-operator-with-sql-backend.git
 ```
 ------
 
