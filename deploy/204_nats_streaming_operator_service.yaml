@@ -1,0 +1,27 @@
+---
+apiVersion: "streaming.nats.io/v1alpha1"
+kind: "NatsStreamingCluster"
+metadata:
+  name: "labs-nats-stan"
+spec:
+  natsSvc: "labs-nats-cluster"
+
+  # Explicitly set that the managed NATS Streaming instance
+  # will be using an SQL storage, to ensure that only a single
+  # instance is available.
+  store: SQL
+  configFile: "/etc/stan/config/secret.conf"
+
+  # Customize using a Pod Spec template
+  template:
+    spec:
+      volumes:
+      - name: stan-secret
+        secret:
+          secretName: stan-secret
+      containers:
+        - name: nats-streaming
+          volumeMounts:
+          - mountPath: /etc/stan/config
+            name: stan-secret
+            readOnly: true

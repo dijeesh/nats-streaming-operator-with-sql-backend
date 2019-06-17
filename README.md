@@ -43,8 +43,21 @@ https://github.com/nats-io/nats-streaming-operator
 
 Here are the steps we have performed to set up a nats cluster with nats-streaming-operator backed by a SQL store. We are setting up this cluster in EKS and using RDS as Postgres Backend.
 
+### **1. Clone Repository**
 
-### **1. Setup database and confirm connectivity from K8S/EKS**
+```
+git clone https://github.com/dijeesh/nats-streaming-operator-with-db-backend.git
+```
+------
+
+### **2. Create nats-io namespace** 
+
+``` 
+kubectl create ns nats-io
+```
+------
+
+### **3. Setup database and confirm connectivity from K8S/EKS**
 
 We are using our existing RDS Cluster, and security group rules are already exists for allowing connectivity from EKS cluster to RDS Cluster. 
 
@@ -103,17 +116,19 @@ wget https://github.com/nats-io/nats-streaming-server/blob/master/postgres.db.sq
 psql --host=xxxxx-pgdb-001.xxxxx.us-east-1.rds.amazonaws.com --port=5432   --username natsstanuser   --password stan < stan.sql
 ```
 
+------
+### **4. Create secrets** 
 
-### **2. Create nats-io namespace** 
+```
+cd postgres
 
-``` 
-kubectl create ns nats-io
+kubectl -n nats-io create secret generic stan-secret --from-file secret.conf
 ```
 
-### **3. Create secrets** 
+------
+### **5. Generate SSL Certificates**
 
-
-### **4. Generate SSL Certificates**
+**Install cfsssl**
 
 We will be using cfssl to generate SSL Certificates. Run following commands to install cfssl.
 
@@ -122,9 +137,116 @@ sudo curl https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -o /usr/local/bin/cfs
 sudo curl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -o /usr/local/bin/cfssl
 sudo chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson
 ```
-1. 
 
+**Update Configuration files**
 
+cd nats-streaming-operator-with-db-backend/certs
 
+Edit route.json and server.json files and modify the cluster details.
+
+**Generate SSL Certificates**
+
+```
+# CA Certificates
+
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+
+# Server Certificates
+
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server server.json | cfssljson -bare server
+
+# Route Certificates
+
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=route route.json | cfssljson -bare route
+
+# Client Certificates
+
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client.json | cfssljson -bare client
+```
 
 Ref: https://gist.github.com/wallyqs/696b81427df7c239fb34946eb1ae9f92
+
+------
+### **6. Add SSL Certificates to EKS/K8S as Secrets**
+
+Make sure you are running following commands from the certs directory
+
+```
+kubectl -n nats-io create secret generic nats-clients-tls --from-file ca.pem --from-file client-key.pem --from-file client.pem --from-file server-key.pem --from-file server.pem
+
+kubectl -n nats-io create secret generic nats-routes-tls --from-file ca.pem --from-file route-key.pem --from-file route.pem --from-file server-key.pem --from-file server.pem
+```
+
+### **7. Deploy nats-operator Cluster**
+
+```
+cd deploy
+
+kubectl apply -f 101_nats_operator_service_account.yaml
+kubectl apply -f 102_nats_operator_service_role.yaml
+kubectl apply -f 103_nats_operator_deployment.yaml
+kubectl apply -f 104_nats_operator_service.yaml
+```
+
+Edit 103_nats_operator_deployment.yaml and make sure you are using latest [release](https://github.com/nats-io/nats-operator/releases) before applying.    
+
+
+### **8. Deploy nats-streaming-operator**
+
+```
+cd deploy
+
+kubectl apply -f 201_nats_streaming_operator_service_account.yaml
+kubectl apply -f 202_nats_streaming_operator_service_role.yaml
+kubectl apply -f 203_nats_streaming_operator_deployment.yaml
+kubectl apply -f 204_nats_streaming_operator_service.yaml
+```
+
+Edit 203_nats_streaming_operator_deployment.yaml and make sure you are using latest [release](https://github.com/nats-io/nats-streaming-operator/releases) before applying.  
+
+### **9 Verify Cluster resources**
+
+```
+kubectl get crd | grep nats
+kubectl -n nats-io get pods
+kubectl -n nats-io get svc
+```
+
+### **10 Exposing service to other namespaces**
+
+Edit 301_other_namespace_svc.yaml, change the namespace and cluster details.
+
+```
+cd deploy
+kubectl apply -f 301_other_namespace_svc.yaml
+```
+Now the NATS Cluster Service in nats-io namespace can be directly accessable from your appnamespace.
+
+
+### **11 Exposing service to outside EKS Cluster**
+
+If you need to expose the nats service to outside the EKS Cluster, use following snippets.
+
+**With in VPC**
+
+Edit 302_expose_via_internal_elb.yaml, change VPC CIDR/Subnet, and cluster details.
+
+```
+cd deploy
+kubectl apply -f 302_expose_via_internal_elb.yaml
+```
+This will create an Amazon ELB (Internal) and expose it on por 4222. Access restricted to VPC CIDR Only.
+
+
+**Public Network**
+
+Edit 302_expose_via_external_elb.yaml, IP Whitelist, and cluster details.
+
+```
+cd deploy
+kubectl apply -f 302_expose_via_external_elb.yaml
+```
+This will create an Amazon ELB and expose it on por 4222. Access restricted to Whitelisted IPs only.
+
+
+Happy Messaging :)
