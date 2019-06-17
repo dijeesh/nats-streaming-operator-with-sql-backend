@@ -110,3 +110,5 @@ kubectl create ns nats-io
 ```
 
 ### **3. Create secrets** 
+
+1. 
