@@ -140,7 +140,9 @@ sudo chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson
 
 **Update Configuration files**
 
+```
 cd nats-streaming-operator-with-db-backend/certs
+```
 
 Edit route.json and server.json files and modify the cluster details.
 
@@ -240,7 +242,7 @@ This will create an Amazon ELB (Internal) and expose it on por 4222. Access rest
 
 **Public Network**
 
-Edit 302_expose_via_external_elb.yaml, IP Whitelist, and cluster details.
+Edit 303_expose_via_external_elb.yaml, IP Whitelist, and cluster details.
 
 ```
 cd deploy
