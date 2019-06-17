@@ -43,6 +43,8 @@ https://github.com/nats-io/nats-streaming-operator
 
 Here are the steps we have performed to set up a nats cluster with nats-streaming-operator backed by a SQL store. We are setting up this cluster in EKS and using RDS as Postgres Backend.
 
+[1. Setup database and confirm connectivity from K8S/EKS](https://github.com/dijeesh/setup/01_setup_database_backend_and_confirm_connectivity)
+
 ### **1. Setup database and confirm connectivity from K8S/EKS**
 
 We are using our existing RDS Cluster, and security group rules are already exists for allowing connectivity from EKS cluster to RDS Cluster. 
