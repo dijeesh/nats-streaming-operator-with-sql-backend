@@ -237,7 +237,7 @@ Edit 302_expose_via_internal_elb.yaml, change VPC CIDR/Subnet, and cluster detai
 cd deploy
 kubectl apply -f 302_expose_via_internal_elb.yaml
 ```
-This will create an Amazon ELB (Internal) and expose it on por 4222. Access restricted to VPC CIDR Only.
+This will create an Amazon ELB (Internal) and expose it on port 4222. Access restricted to VPC CIDR Only.
 
 
 **Public Network**
@@ -248,7 +248,7 @@ Edit 303_expose_via_external_elb.yaml, IP Whitelist, and cluster details.
 cd deploy
 kubectl apply -f 302_expose_via_external_elb.yaml
 ```
-This will create an Amazon ELB and expose it on por 4222. Access restricted to Whitelisted IPs only.
+This will create an Amazon ELB and expose it on port 4222. Access restricted to Whitelisted IPs only.
 
 
 Happy Messaging :)
