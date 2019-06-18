@@ -251,4 +251,9 @@ kubectl apply -f 302_expose_via_external_elb.yaml
 This will create an Amazon ELB and expose it on port 4222. Access restricted to Whitelisted IPs only.
 
 
+
 Happy Messaging :)
+
+
+
+Research Partner : [Sahir Abbas](https://github.com/sahirabbas-k) 
